@@ -29,6 +29,7 @@ export const createMarksDto = z
   })
   .superRefine((body, ctx) => {
     const seen = new Set<string>();
+    let duplicateSubjects = false;
     body.marks.forEach((item, index) => {
       if (item.score > item.maxScore) {
         ctx.addIssue({
@@ -38,14 +39,17 @@ export const createMarksDto = z
         });
       }
       if (seen.has(item.subject)) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['marks'],
-          message: 'subjects must be unique in the array',
-        });
+        duplicateSubjects = true;
       }
       seen.add(item.subject);
     });
+    if (duplicateSubjects) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['marks'],
+        message: 'subjects must be unique in the array',
+      });
+    }
   });
 export type CreateMarksDto = z.infer<typeof createMarksDto>;
 

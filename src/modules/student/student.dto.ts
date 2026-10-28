@@ -64,12 +64,18 @@ const guardianSchema = z.strictObject({
   phone: z
     .string({ error: 'guardian.phone must be a string' })
     .transform((value) => value.normalize('NFC').trim().replace(/[\s-]/g, ''))
+    .refine((value) => !/[\u0000-\u001F\u007F<>]/.test(value), {
+      message: 'guardian.phone contains forbidden characters',
+    })
     .refine((value) => E164.test(value), {
       message: 'guardian.phone must be E.164 (e.g. +919876543210)',
     }),
   relation: z
     .string({ error: 'guardian.relation must be a string' })
     .transform((value) => value.normalize('NFC').trim().toLowerCase())
+    .refine((value) => !/[\u0000-\u001F\u007F<>]/.test(value), {
+      message: 'guardian.relation contains forbidden characters',
+    })
     .refine((value): value is (typeof GUARDIAN_RELATIONS)[number] =>
       (GUARDIAN_RELATIONS as readonly string[]).includes(value), {
       message: 'guardian.relation must be father, mother, or guardian',

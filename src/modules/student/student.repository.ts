@@ -19,14 +19,6 @@ const COLUMNS = `
 const GUARDIAN_RELATIONS = new Set<GuardianRelation>(['father', 'mother', 'guardian']);
 const PG_UNIQUE_VIOLATION = '23505';
 
-const toDateOnlyString = (value: Date | string): string => {
-  if (typeof value === 'string') return value.slice(0, 10);
-  const y = value.getUTCFullYear();
-  const m = String(value.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(value.getUTCDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
-
 /** Map a DB row → domain Student. Rows never leave this file. */
 export const toDomain = (row: StudentRow): Student => {
   if (!GUARDIAN_RELATIONS.has(row.guardian_relation as GuardianRelation)) {
@@ -178,6 +170,3 @@ export const remove = async (id: number): Promise<boolean> => {
   const { rowCount } = await pool.query('DELETE FROM students WHERE id = $1', [id]);
   return (rowCount ?? 0) > 0;
 };
-
-/** Exported for mapping tests that need a stable date formatter. */
-export const formatDateOfBirth = toDateOnlyString;

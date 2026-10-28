@@ -287,6 +287,48 @@ describe('Student & Marks validation / sanitisation', () => {
       expect(JSON.stringify(res.body.details)).toMatch(/score/);
       expect(markRepository.update).not.toHaveBeenCalled();
     });
+
+    it('rejects score with more than 2 decimal places', async () => {
+      const res = await request(app)
+        .post('/api/students/1/marks')
+        .send({
+          exam: 'midterm',
+          marks: [{ subject: 'maths', score: 80.123, maxScore: 100 }],
+        });
+
+      expect(res.status).toBe(400);
+      expect(JSON.stringify(res.body.details)).toMatch(/marks\.0\.score/);
+      expectReposUntouched();
+    });
+
+    it('rejects constructor prototype pollution key', async () => {
+      const payload = JSON.stringify({
+        ...validStudent,
+        guardian: validGuardian,
+      }).replace(/\}$/, ',"constructor":{"prototype":{"admin":true}}}');
+
+      const res = await request(app)
+        .post('/api/students')
+        .set('Content-Type', 'application/json')
+        .send(payload);
+
+      expect(res.status).toBe(400);
+      expect(JSON.stringify(res.body.details)).toMatch(/constructor|payload|Forbidden/i);
+      expectReposUntouched();
+    });
+
+    it('defaults omitted maxScore to 100 then rejects score above it', async () => {
+      const res = await request(app)
+        .post('/api/students/1/marks')
+        .send({
+          exam: 'final',
+          marks: [{ subject: 'science', score: 120 }],
+        });
+
+      expect(res.status).toBe(400);
+      expect(JSON.stringify(res.body.details)).toMatch(/marks\.0\.score/);
+      expectReposUntouched();
+    });
   });
 
   describe('positive sanitisation', () => {

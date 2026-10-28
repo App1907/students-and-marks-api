@@ -1,7 +1,7 @@
 {
   "name": "student-marks-api",
   "version": "1.0.0",
-  "description": "Student CRUD, Marks CRUD and subject-wise averages — Express 5 + TypeScript + PostgreSQL.",
+  "description": "Students & Marks API — config validation, input sanitisation, repository mapping (Express 5 + TypeScript + PostgreSQL).",
   "main": "dist/server.js",
   "private": true,
   "engines": {
